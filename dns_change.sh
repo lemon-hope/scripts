@@ -7,12 +7,9 @@
 
 file_name=$(basename "$0")
 dns_file_path="/etc" # default path of the resolv.conf file
-dns_files_array=("resolv.conf.crypt" "resolv.conf.base" "resolv.conf.vpn")# each file has different configuration for the dns server  
 dns_base_file="$dns_file_path/resolv.conf"
 SUCCESS=0
 ERROR=1
-
-
 
 change_file (){
 	if [ -z $1 ]
@@ -26,11 +23,11 @@ change_file (){
 			;;
 
 			vpn)
-				change_mode 1
+				change_mode 2 
 			;;
 
 			*)
-				change_mode 2
+				change_mode 1
 			;;
 		esac
 	fi
@@ -38,48 +35,67 @@ change_file (){
 					
 }
 
-crypt_mode(){
-	crypt_dns_file="$dns_file_path/$dns_file_array[0]"  
-	echo "Verifying if crypt DNS file exist..."
-	if [ -f $crypt_dns_file ]
-	then
-		"crypt dns file exists => changing configuration..."
-		# remove the chattr attribute and
-		# switch the resolv.conf content by the resolv.conf.crypt content
-		sudo cp -f $crypt_dns_file $dns_base_file
+
+change_mode(){
+	echo "Verify if $dns_base_file is immutable..."
+	attributes=$(lsattr "$dns_base_file")
+	if ! [[ attributes == *"i"* ]] && [ "$1" -eq 0 ]
+	then	
+		echo "changing DNS configuration to encrypted mode..."
+		sudo echo -e "\
+			nameserver ::1\n
+			nameserver 127.0.0.1\n
+			options trust-ad\n" > dns_base_file 
 		sudo chattr +i $dns_base_file
 		reload_configs 1
 		echo "Done, enjoy encrypted DNS :)"
-	else
-		"echo crypt DNS file does not exist terminating..."
-		exit $ERROR
-	fi
-		
-}
 
-change_mode(){
-	new_dns_file="$dns_file_path/$dns_file_array["$1"]"
-	echo "Verifying if $1 configuration exist..."
-	if [ -f $new_dns_file ]
-	then
-		echo "Verify if $dns_base_file is immutable..."
-		attributes=$(lsattr "$dns_base_file")
-		if [[ attributes == *"i"* ]]
-		then
-			echo "file has chattr +i set, changing..."
-			sudo chattr -i "$dns_base_file"
-			sudo cp -f $new_dns_file $dns_base_file
+	elif ! [[ attributes == *"i"* ]] && [ "$1" -ne  0 ]
+		if [ "$1" -eq 1 ]
+		then 
+			echo "Changing DNS configuration to standard mode..."
+			sudo echo -e "\
+				nameserver 9.9.9.9\n
+				nameserver 1.1.1.1\n
+			" > dns_base_file
+			sudo chattr +i dns_base_file
 			reload_configs 2
-			echo "Done! ready to use"
+			echo "Done!"	
+
 		else
-			echo "file has no chattr +i set"
-			sudo cp -f $new_dns_file $dns_base_file
+			echo "Changing DNS configuration to VPN mode..."
+			sudo echo -e " " > dns_base_file 
 			reload_configs 2
-			echo "Done! ready to use"
+		fi
+	elif [[ attributes == *"i"* ]] && [ "$1" -ne  0 ]
+		echo "$dns_base_file has chattr +i set changing..."
+		sudo chattr -i dns_base_file
+		if [ "$1" -eq 1 ]
+		then 
+			echo "Changing DNS configuration to standard mode..."
+			sudo echo -e "\
+				nameserver 9.9.9.9\n
+				nameserver 1.1.1.1\n
+			" > dns_base_file
+			sudo chattr +i dns_base_file
+			reload_configs 2
+			echo "Done!"	
+
+		else
+			echo "Changing DNS configuration to VPN mode..."
+			sudo echo -e " " > dns_base_file 
+			reload_configs 2
 		fi
 	else
-		echo "$new_dns_file configuration file does not exist terminating..."
-		exit $ERROR
+		echo "changing DNS configuration to encrypted mode..."
+		sudo echo -e "\
+			nameserver ::1\n
+			nameserver 127.0.0.1\n
+			options trust-ad\n" > dns_base_file 
+		sudo chattr +i $dns_base_file
+		reload_configs 1
+		echo "Done, enjoy encrypted DNS :)"
+	
 	fi
 	
 
