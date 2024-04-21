@@ -91,7 +91,18 @@ change_mode () {
 }
 
 #TODO
-#get_mode () {;}
+
+get_mode () {
+	content = head -1 $dns_base_file
+	if [ [ $content == "nameserver ::1" ]]
+	then
+		echo "Current DNS configuration mode => ECRYPTED"
+	elif  [ [ $content == "nameserver 9.9.9.9" ]]
+		echo "Current DNS configuration mode => STANDARD / BASIC"
+	else
+		echo "Current DNS configuration => VPN / FREE"
+	fi
+}
 
 
 usage () {
