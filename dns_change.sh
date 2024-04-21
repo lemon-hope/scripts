@@ -126,4 +126,5 @@ reload_configs(){
 		;;
 }
 
+change_file $1
 
