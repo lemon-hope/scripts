@@ -42,10 +42,7 @@ change_mode () {
 	if ! [[ attributes == *"i"* ]] && [ "$1" -eq 0 ]
 	then	
 		echo "changing DNS configuration to encrypted mode..."
-		sudo sh -c "echo -e \"\
-		\	nameserver ::1\n
-		\	nameserver 127.0.0.1\n
-		\	options trust-ad\n\" > $dns_base_file" 
+		sudo sh -c "echo -e \"nameserver ::1\nnameserver 127.0.0.1\noptions trust-ad\n\" > $dns_base_file" 
 		sudo chattr +i $dns_base_file
 		reload_configs 1
 		echo "Done, enjoy encrypted DNS :)"
@@ -54,10 +51,7 @@ change_mode () {
 		if [ "$1" -eq 1 ]
 		then 
 			echo "Changing DNS configuration to standard mode..."
-			sudo sh -c "echo -e \"\
-				nameserver 9.9.9.9\n
-				nameserver 1.1.1.1\n
-			\" > dns_base_file"
+			sudo sh -c "echo -e \"nameserver 9.9.9.9\nnameserver 1.1.1.1\n\" > $dns_base_file"
 			sudo chattr +i $dns_base_file
 			reload_configs 2
 			echo "Done!"	
@@ -73,10 +67,7 @@ change_mode () {
 		if [ "$1" -eq 1 ]
 		then 
 			echo "Changing DNS configuration to standard mode..."
-			sudo sh -c "echo -e \"\
-			\	nameserver 9.9.9.9\n
-			\	nameserver 1.1.1.1\n
-			\" > $dns_base_file"
+			sudo sh -c "echo -e \"nameserver 9.9.9.9\nnameserver 1.1.1.1\n\" > $dns_base_file"
 			sudo chattr +i $dns_base_file
 			reload_configs 2
 			echo "Done!"	
@@ -88,10 +79,8 @@ change_mode () {
 		fi
 	else
 		echo "changing DNS configuration to encrypted mode..."
-		sudo sh -c "echo -e \"\
-			nameserver ::1\n
-			nameserver 127.0.0.1\n
-			options trust-ad\n\" > $dns_base_file" 
+		sudo chattr -i $dns_base_file
+		sudo sh -c "echo -e \"nameserver ::1\nnameserver 127.0.0.1\noptions trust-ad\n\" > $dns_base_file" 
 		sudo chattr +i $dns_base_file
 		reload_configs 1
 		echo "Done, enjoy encrypted DNS :)"
