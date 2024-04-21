@@ -26,8 +26,11 @@ change_file () {
 				change_mode 2 
 			;;
 
-			*)
+			std)
 				change_mode 1
+			;;
+			*)
+				get_mode
 			;;
 		esac
 	fi
@@ -110,7 +113,9 @@ usage () {
 	echo -e "MODE\n \
 		crypt : for encrypted DNS configuration with stubby and dnsmasq\n \
 		vpn   : for vp DNS configuration file\n \
-		std   : for a standadr DNS configuration file\n "
+		std   : for a standadr DNS configuration file\n \
+		mode  : to display the current configuration\n
+		 "
 }
 
 reload_configs () {
