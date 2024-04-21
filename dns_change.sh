@@ -11,7 +11,7 @@ dns_base_file="$dns_file_path/resolv.conf"
 SUCCESS=0
 ERROR=1
 
-change_file (){
+change_file () {
 	if [ -z $1 ]
 	then
 		usage
@@ -36,7 +36,7 @@ change_file (){
 }
 
 
-change_mode(){
+change_mode () {
 	echo "Verify if $dns_base_file is immutable..."
 	attributes=$(lsattr "$dns_base_file")
 	if ! [[ attributes == *"i"* ]] && [ "$1" -eq 0 ]
@@ -50,7 +50,7 @@ change_mode(){
 		reload_configs 1
 		echo "Done, enjoy encrypted DNS :)"
 
-	elif ! [[ attributes == *"i"* ]] && [ "$1" -ne  0 ]
+	elif ! [[ attributes == *"i"* ]] && [ "$1" -ne  0 ];then
 		if [ "$1" -eq 1 ]
 		then 
 			echo "Changing DNS configuration to standard mode..."
@@ -67,7 +67,7 @@ change_mode(){
 			sudo echo -e " " > dns_base_file 
 			reload_configs 2
 		fi
-	elif [[ attributes == *"i"* ]] && [ "$1" -ne  0 ]
+	elif [[ attributes == *"i"* ]] && [ "$1" -ne  0 ];then
 		echo "$dns_base_file has chattr +i set changing..."
 		sudo chattr -i dns_base_file
 		if [ "$1" -eq 1 ]
@@ -103,7 +103,7 @@ change_mode(){
 
 
 
-usage(){
+usage () {
 	echo "usage : $file_name [MODE]"
 	echo -e "MODE\n \
 		crypt : for encrypted DNS configuration with stubby and dnsmasq\n \
@@ -111,7 +111,7 @@ usage(){
 		std   : for a standadr DNS configuration file\n "
 }
 
-reload_configs(){
+reload_configs () {
 
 	echo "reloading configs..."
 	case $1 in
@@ -124,6 +124,7 @@ reload_configs(){
 			&& sudo systemctl stop --now dnsmasq.service \
 			&& sudo systemctl restart NetworkManager
 		;;
+	esac
 }
 
 change_file $1
