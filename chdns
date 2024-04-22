@@ -1,9 +1,11 @@
 #!/usr/bin/bash
 # Script used to change the /etc/resolv.conf file automatically for differente usages 
-# usage cases :
-# crypt for encrypted dns 
-# vpn for vpn access
-# dafult for basic / standard usage 
+# usage : chdns [MODE]
+# MODE :
+# crypt for encrypted dns with stubby and dnsmasq
+# vpn for vpn access dns configuration
+# std for standard dns configuration (quad9 and cloudfare) 
+# mode print the current dns configuration
 
 file_name=$(basename "$0")
 dns_file_path="/etc" # default path of the resolv.conf file
@@ -15,7 +17,7 @@ change_file () {
 	if [ -z $1 ]
 	then
 		usage
-		exit ERROR
+		exit ERROR > /dev/null 2>&1
 	else
 		case $1 in
 			crypt)
@@ -114,8 +116,7 @@ usage () {
 		crypt : for encrypted DNS configuration with stubby and dnsmasq\n \
 		vpn   : for vp DNS configuration file\n \
 		std   : for a standadr DNS configuration file\n \
-		mode  : to display the current configuration\n
-		 "
+		mode  : to display the current DNS configuration"
 }
 
 reload_configs () {
