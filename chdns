@@ -95,13 +95,12 @@ change_mode () {
 
 }
 
-#TODO
 
 get_mode () {
 	content=$(head -1 $dns_base_file)
 	if [[ $content == "nameserver ::1" ]]
 	then
-		echo -e "Current DNS configuration mode => \e[32m ECRYPTED\e[0m"
+		echo -e "Current DNS configuration mode => \e[32m ENCRYPTED\e[0m"
 	elif  [[ $content == "nameserver 9.9.9.9" ]];then
 		echo -e "Current DNS configuration mode => \e[31m STANDARD / BASIC\e[0m"
 	else
