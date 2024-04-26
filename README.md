@@ -12,6 +12,7 @@ Run the script :
 
 ## Known bugs / limitations  
 ## Extra 
-
+- Add the script dir to your `$PATH` variable 
+  `echo "export \"PATH=`pwd`:$PATH\"" >> $HOME/.bashrc && source $HOME/.bashrc`
 
 
