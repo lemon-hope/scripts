@@ -1,0 +1,43 @@
+#!/usr/bin/sh  
+# A simple bash script to fix grub with btrfs and luks2 like a pro XD
+# the process is splited out into main phases
+# @author mr.printf 
+
+#please change this 
+mount_point="/mnt"
+luks_partition="/dev/nvmn1p1"
+crypt_label="crypt_root"
+efi_partition="/dev/sda1"
+btrfs_sub_vol_id="@" 
+mount_args="noatime,compress=zstd:1,subvol=$btrfs_sub_vol_id"
+grub_install_args="--target=x86_64-efi --efi-directory"
+
+fix_grub () {
+	
+
+
+
+}
+
+# Open the crypt partition and mount it
+phase_one () {
+	echo "Opening luks device..."
+	cryptsetup open $luks_partition $crypt_label
+	echo "mounting to $mount_point..." 
+	mount -o $mount_args /dev/mapper/$crypt_label $mount_point
+	mount 
+	echo "running chroot to $mount_point..."
+	arch-chroot $mount_point
+	exit 
+
+}
+#reinstall and reconfigure grub
+phase_two () {
+	grub-install
+
+}
+ 
+usage () {
+
+
+}
