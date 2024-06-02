@@ -54,10 +54,12 @@ phase_two () {
 
 usage () { 
 
-	echo "usage : $(basename "$0") [PHASE]"
-	echo -e "PHASE\n \
+	echo "usage : $(basename "$0") [OPTION]"
+	echo -e "OPTION:\n \
 		-p1   : for phase 1 - mount disks and chroot\n \
 		-p2   : for phase 2 - reinstall and reconfigure grub\n \
-		 -h : to display the current help"
+		-h : to display the current help"
 }
+
+fix_grub $1
 
