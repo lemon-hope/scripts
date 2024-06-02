@@ -1,11 +1,12 @@
 #!/usr/bin/sh  
 # A simple bash script to fix grub with btrfs and luks2 like a pro XD
-# the process is splited out into main phases and need to be executed in a live cd image
+# the process is splited out into 2 main phases and need to be executed in order 1 then 2
+# phase 1 is executed inside the live cd and phase 2 inside the chroot env 
 # @author mr.printf 
 
 #please change this 
 mount_point="/mnt"
-luks_partition="/dev/nvmn1p1"
+luks_partition="/dev/nvme0n1p1"
 crypt_label="crypt_root"
 efi_partition="/dev/sda1"
 efi_mount_point="/boot/EFI"
@@ -16,9 +17,15 @@ mount_args="noatime,compress=zstd:1,subvol=$btrfs_sub_vol_id"
 grub_install_args="--target=x86_64-efi --efi-directory=$efi_mount_point --bootloader-id=$bootloader_id"
 
 fix_grub () {
-	
-
-
+	if [[ $1 == "-p1" ]]
+	then
+		phase_one
+	elif [[$1 == "-p2" ]];then
+		phase_two
+	else
+		usage
+		exit 1
+	fi	
 
 }
 
