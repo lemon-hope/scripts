@@ -20,7 +20,7 @@ fix_grub () {
 	if [[ $1 == "-p1" ]]
 	then
 		phase_one
-	elif [[$1 == "-p2" ]];then
+	elif [[ $1 == "-p2" ]];then
 		phase_two
 	else
 		usage
