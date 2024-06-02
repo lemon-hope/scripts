@@ -1,6 +1,6 @@
 #!/usr/bin/sh  
 # A simple bash script to fix grub with btrfs and luks2 like a pro XD
-# the process is splited out into main phases
+# the process is splited out into main phases and need to be executed in a live cd image
 # @author mr.printf 
 
 #please change this 
@@ -8,9 +8,12 @@ mount_point="/mnt"
 luks_partition="/dev/nvmn1p1"
 crypt_label="crypt_root"
 efi_partition="/dev/sda1"
+efi_mount_point="/boot/EFI"
+grub_cfg_location="/boot/grub/grub.cfg"
+bootloader_id="grub"
 btrfs_sub_vol_id="@" 
 mount_args="noatime,compress=zstd:1,subvol=$btrfs_sub_vol_id"
-grub_install_args="--target=x86_64-efi --efi-directory"
+grub_install_args="--target=x86_64-efi --efi-directory=$efi_mount_point --bootloader-id=$bootloader_id"
 
 fix_grub () {
 	
@@ -25,19 +28,29 @@ phase_one () {
 	cryptsetup open $luks_partition $crypt_label
 	echo "mounting to $mount_point..." 
 	mount -o $mount_args /dev/mapper/$crypt_label $mount_point
-	mount 
+	mount $efi_partition $mount_point/$efi_mount_point 
 	echo "running chroot to $mount_point..."
 	arch-chroot $mount_point
-	exit 
+	exit 0
 
 }
 #reinstall and reconfigure grub
 phase_two () {
-	grub-install
-
+	echo "Reinstalling grub..."
+	grub-install $grub_install_args 
+	echo "Reconfiguring grub..."
+	grub-mkconfig -o $grub_cfg_location
+	echo "[X] Done"
+	exit 0 
 }
  
-usage () {
 
+usage () { 
 
+	echo "usage : $(basename "$0") [PHASE]"
+	echo -e "PHASE\n \
+		-p1   : for phase 1 - mount disks and chroot\n \
+		-p2   : for phase 2 - reinstall and reconfigure grub\n \
+		 -h : to display the current help"
 }
+
