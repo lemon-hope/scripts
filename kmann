@@ -10,7 +10,8 @@ ENCRYPTED_ARCHIVE_NAME="$ARCHIVE_NAME.gpg"
 # create and encrypt tar archive
 recreate_archive () {
 	cd $VAULT_DIR && tar czvf $ARCHIVE_NAME --directory=$MOUNT_DIR . 
-       	yes | gpg -c $ARCHIVE_NAME 
+       	gpg --yes  -c $ARCHIVE_NAME
+       	gpg-conf kill gpg-agent	
 	rm -v $ARCHIVE_NAME
 	rm -v $MOUNT_DIR/*
 }
