@@ -11,6 +11,7 @@ ENCRYPTED_ARCHIVE_NAME="$ARCHIVE_NAME.gpg"
 recreate_archive () {
 	cd $VAULT_DIR && tar czvf $ARCHIVE_NAME $MOUNT_DIR 
        	gpg -c $ARCHIVE_NAME 
+	rm $ARCHIVE_NAME
 	rm $MOUNT_DIR/*
 }
 
@@ -26,19 +27,38 @@ mount_vault () {
 		tar xfzv $VAULT_DIR/$ARCHIVE_NAME  --directory $MOUNT_DIR   
 }
 
-unmount_vault () {
-	recreate_archive
-
-}
 
 usage () {
 	echo "$file_name : a simple script to mannage accounts recovery keys in an encrypted form"
 	echo "usage : $file_name <Option>"
 	echo -e "Option\n \
 	--recreate    : to recreate the encrypted archive\n \
-		vpn   : for vp DNS configuration file\n \
-		std   : for a standadr DNS configuration file\n \
-		mode  : to display the current DNS configuration"
+	--add         : to add a new file to the encrypted archive \n \
+	--mount       : decrypt and mount the content of the archive to the specific dir\n \
+	--unmount     : same as --recreate "
 
 }
-if 
+
+if [ -z $1 ]
+then
+	usage
+	exit 1
+else
+	case $1 in
+		--recreate)
+			recreate_archive
+		;;
+		--add)
+			add_files
+		;;
+		--mount)
+			mount_vault
+		;;
+		--umount)
+			recreate_archive
+		;;
+		*)
+			usage
+	esac
+fi
+exit 0
