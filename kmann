@@ -1,6 +1,6 @@
 #!/usr/bin/sh 
+set -e 
 # A simple script to mannage accounts recovery keys
-
 file_name=$(basename "$0")
 VAULT_DIR="$HOME/Vault"
 MOUNT_DIR="$HOME/Documents/505.SEC-CRYPTIC"
@@ -12,8 +12,10 @@ recreate_archive () {
 	cd "$VAULT_DIR" || { echo "failed to change directory to $VAULT_DIR"; exit 1; } 
 	if tar czvf "$ARCHIVE_NAME" --directory="$MOUNT_DIR" .; then
        		gpg --yes  -c "$ARCHIVE_NAME" || { echo "GPG encryption failed"; exit 1; }
-		rm -v "$ARCHIVE_NAME"
-		rm -v "$MOUNT_DIR/*"
+		shred -u -n 1 -v "$ARCHIVE_NAME"
+		for file in "$MOUNT_DIR"/*; do
+			shred -u -n 1 -v "$file"
+		done
 	else
 		echo "Error creating tar archive"
 		exit 1
@@ -37,7 +39,7 @@ mount_vault () {
 	gpgconf --kill gpg-agent
 	gpg -d --verbose "$VAULT_DIR"/"$ENCRYPTED_ARCHIVE_NAME" > "$VAULT_DIR"/"$ARCHIVE_NAME" || { echo "GPG error decrypting tar archive"; exit 1; }	
 	if tar xfzv "$VAULT_DIR"/"$ARCHIVE_NAME"  --directory="$MOUNT_DIR" ; then
-     		rm -v "$VAULT_DIR"/"$ARCHIVE_NAME"
+     		shred -u -n 1 -v "$VAULT_DIR"/"$ARCHIVE_NAME"
 	else
 		echo "Error extracting tar archive"
 		exit 1
