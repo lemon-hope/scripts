@@ -10,20 +10,22 @@ ENCRYPTED_ARCHIVE_NAME="$ARCHIVE_NAME.gpg"
 # create and encrypt tar archive
 recreate_archive () {
 	cd $VAULT_DIR && tar czvf $ARCHIVE_NAME --directory=$MOUNT_DIR . 
-       	gpg -c $ARCHIVE_NAME 
-	rm $ARCHIVE_NAME
-	rm $MOUNT_DIR/*
+       	yes | gpg -c $ARCHIVE_NAME 
+	rm -v $ARCHIVE_NAME
+	rm -v $MOUNT_DIR/*
 }
 
 add_files () {
 	cd  $VAULT_DIR && gpg -d --verbose $ENCRYPTED_ARCHIVE_NAME > $ARCHIVE_NAME
 	tar xzvf $ARCHIVE_NAME --directory $MOUNT_DIR
 	recreate_archive	
+	mount_vault
 }
 
 mount_vault () {
-	gpg -d --verbose $VAULT_DIR/$ENCRYPTED_ARCHIVE_NAME > \	
-		tar xfzv $VAULT_DIR/$ARCHIVE_NAME  --directory $MOUNT_DIR   
+	gpg -d --verbose $VAULT_DIR/$ENCRYPTED_ARCHIVE_NAME > $VAULT_DIR/$ARCHIVE_NAME	
+	tar xfzv $VAULT_DIR/$ARCHIVE_NAME  --directory $MOUNT_DIR
+     	rm -v $VAULT_DIR/$ARCHIVE_NAME	
 }
 
 
