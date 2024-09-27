@@ -1,5 +1,5 @@
 #!/usr/bin/sh 
-# A simple recovery keys mannager script
+# A simple script to mannage accounts recovery keys
 
 file_name=$(basename "$0")
 VAULT_DIR="$HOME/Vault"
@@ -11,7 +11,7 @@ ENCRYPTED_ARCHIVE_NAME="$ARCHIVE_NAME.gpg"
 recreate_archive () {
 	cd $VAULT_DIR && tar czvf $ARCHIVE_NAME --directory=$MOUNT_DIR . 
        	gpg --yes  -c $ARCHIVE_NAME
-       	gpg-conf kill gpg-agent	
+       	#gpgconf --kill gpg-agent	
 	rm -v $ARCHIVE_NAME
 	rm -v $MOUNT_DIR/*
 }
@@ -24,8 +24,9 @@ add_files () {
 }
 
 mount_vault () {
+	gpgconf --kill gpg-agent
 	gpg -d --verbose $VAULT_DIR/$ENCRYPTED_ARCHIVE_NAME > $VAULT_DIR/$ARCHIVE_NAME	
-	tar xfzv $VAULT_DIR/$ARCHIVE_NAME  --directory $MOUNT_DIR
+	tar xfzv $VAULT_DIR/$ARCHIVE_NAME  --directory=$MOUNT_DIR
      	rm -v $VAULT_DIR/$ARCHIVE_NAME	
 }
 
