@@ -9,25 +9,39 @@ ENCRYPTED_ARCHIVE_NAME="$ARCHIVE_NAME.gpg"
 
 # create and encrypt tar archive
 recreate_archive () {
-	cd $VAULT_DIR && tar czvf $ARCHIVE_NAME --directory=$MOUNT_DIR . 
-       	gpg --yes  -c $ARCHIVE_NAME
-       	#gpgconf --kill gpg-agent	
-	rm -v $ARCHIVE_NAME
-	rm -v $MOUNT_DIR/*
+	cd "$VAULT_DIR" || { echo "failed to change directory to $VAULT_DIR"; exit 1; } 
+	if tar czvf "$ARCHIVE_NAME" --directory="$MOUNT_DIR" .; then
+       		gpg --yes  -c "$ARCHIVE_NAME" || { echo "GPG encryption failed"; exit 1; }
+		rm -v "$ARCHIVE_NAME"
+		rm -v "$MOUNT_DIR/*"
+	else
+		echo "Error creating tar archive"
+		exit 1
+	fi
+
 }
 
 add_files () {
-	cd  $VAULT_DIR && gpg -d --verbose $ENCRYPTED_ARCHIVE_NAME > $ARCHIVE_NAME
-	tar xzvf $ARCHIVE_NAME --directory $MOUNT_DIR
-	recreate_archive	
-	mount_vault
+	cd  "$VAULT_DIR" || { echo "Error changing directory to $VAULT_DIR"; exit 1; } 
+	gpg -d --verbose "$ENCRYPTED_ARCHIVE_NAME" > "$ARCHIVE_NAME" || { echo "GPG error decrypting tar archive"; exit 1; }
+	if tar xzvf "$ARCHIVE_NAME" --directory "$MOUNT_DIR" ; then
+		recreate_archive	
+		mount_vault
+	else
+		echo "Error extracting tar archive"
+		exit 1
+	fi
 }
 
 mount_vault () {
 	gpgconf --kill gpg-agent
-	gpg -d --verbose $VAULT_DIR/$ENCRYPTED_ARCHIVE_NAME > $VAULT_DIR/$ARCHIVE_NAME	
-	tar xfzv $VAULT_DIR/$ARCHIVE_NAME  --directory=$MOUNT_DIR
-     	rm -v $VAULT_DIR/$ARCHIVE_NAME	
+	gpg -d --verbose "$VAULT_DIR"/"$ENCRYPTED_ARCHIVE_NAME" > "$VAULT_DIR"/"$ARCHIVE_NAME" || { echo "GPG error decrypting tar archive"; exit 1; }	
+	if tar xfzv "$VAULT_DIR"/"$ARCHIVE_NAME"  --directory="$MOUNT_DIR" ; then
+     		rm -v "$VAULT_DIR"/"$ARCHIVE_NAME"
+	else
+		echo "Error extracting tar archive"
+		exit 1
+	fi	
 }
 
 
